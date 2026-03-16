@@ -15,6 +15,7 @@
 @media (prefers-reduced-motion: no-preference) {
   html {
     interpolate-size: allow-keywords;
+    scroll-behavior: smooth;
   }
 }
 
@@ -23,7 +24,7 @@ body {
   line-height: 1.5;
   /* 5. Improve text rendering */
   -webkit-font-smoothing: antialiased;
-  background-color: rgb(101, 139, 139);
+  background-color: #4fd9c9;
 }
 
 /* 6. Improve media defaults */
