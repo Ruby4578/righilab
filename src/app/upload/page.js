@@ -128,7 +128,7 @@ export default function Upload() {
               transition={{ duration: 0.3 }}
             >
               <Image src="/card-1.png" alt="Un robot che riceve argomento" width={100} height={100} />
-              <h3>Scegli l'argomento</h3>
+              <h3>Scegli l&apos;argomento</h3>
               <p>Seleziona un argomento da studiare.</p>
               <button onClick={() => handleCardClick('topic')} className={styles.fullCta}>Seleziona</button>
             </motion.div>
@@ -172,7 +172,7 @@ export default function Upload() {
             )}
             {selectedMethod === 'topic' && (
               <form onSubmit={handleSubmit} className={styles.form}>
-                <h3>Scegli l'argomento</h3>
+                <h3>Scegli l&apos;argomento</h3>
                 <input
                   type="text"
                   placeholder="Inserisci una parola chiave"

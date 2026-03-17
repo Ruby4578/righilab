@@ -66,12 +66,12 @@ export default function Home() {
           <div className={styles.aboutUsSections}>
             <div className={styles.aboutUsContainer}>
               <p>Questo progetto nasce per i <Link href="https://www.campionatidirobotica.it">Campionati Italiani di Robotica 2025-2026</Link>.
-                Il tema scelto è “imparare giocando”, e da questa idea è nata RighiLab: una piattaforma che trasforma appunti e video in giochi educativi guidati da un robot.</p>
+                Il tema scelto è &quot;imparare giocando&quot;, e da questa idea è nata RighiLab: una piattaforma che trasforma appunti e video in giochi educativi guidati da un robot.</p>
               <Image src="/chisiamo.png" alt="Un robot che vola felice insieme a mille progetti.." width="350" height="220" />
             </div>
             <div className={styles.aboutUsContainer}>
               <div className={styles.containerText}>
-                <p>Il progetto è stato realizzato da un team di 7 studenti dell’Istituto Righi, guidati dai professori Antonio Testa e Gaetano Sito. Gli studenti sono:</p>
+                <p>Il progetto è stato realizzato da un team di 7 studenti dell&apos;Istituto Righi, guidati dai professori Antonio Testa e Gaetano Sito. Gli studenti sono:</p>
                 <ul>
                   {STUDENTS.map((student, index) => (
                     <li key={index}>{student.name} ({student.role})</li>
@@ -91,7 +91,7 @@ export default function Home() {
 const CARDS = [
   {
     title: "Carica",
-    content: "Carica appunti, un video YouTube o scrivi semplicemente l’argomento che vuoi studiare.",
+    content: "Carica appunti, un video YouTube o scrivi semplicemente l'argomento che vuoi studiare.",
     img: "/card-1.png",
     alt: "Un robot che riceve file.",
   },
