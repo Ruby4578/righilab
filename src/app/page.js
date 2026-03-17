@@ -39,16 +39,26 @@ export default function Home() {
             {CARDS.map((item, index) => (
               <Fragment key={item.title}>
                 <motion.li
-                  className={styles.card}
+                  className={`${styles.card} ${item.href ? styles.cardInteractive : ""}`.trim()}
                   initial={{ opacity: 0, y: 28, scale: 0.96 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ duration: 0.48, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
                   whileHover={{ y: -6, scale: 1.01 }}
                 >
-                  <Image src={item.img} alt={item.alt} width={100} height={100} />
-                  <h3>{item.title}</h3>
-                  <p>{item.content}</p>
+                  {item.href ? (
+                    <Link href={item.href} className={styles.cardLink}>
+                      <Image src={item.img} alt={item.alt} width={100} height={100} />
+                      <h3>{item.title}</h3>
+                      <p>{item.content}</p>
+                    </Link>
+                  ) : (
+                    <>
+                      <Image src={item.img} alt={item.alt} width={100} height={100} />
+                      <h3>{item.title}</h3>
+                      <p>{item.content}</p>
+                    </>
+                  )}
                 </motion.li>
                 {index < CARDS.length - 1 && (
                   <motion.li
@@ -76,7 +86,7 @@ export default function Home() {
             </div>
             <div className={styles.aboutUsContainer}>
               <div className={styles.containerText}>
-                <p>Il progetto è stato realizzato da un team di 7 studenti dell&apos;Istituto Righi, guidati dai professori Antonio Testa e Gaetano Sito. Gli studenti sono:</p>
+                <p>Il progetto è stato realizzato da un team di 7 studenti dell&apos;Istituto Augusto Righi di Napoli, guidati dai professori Antonio Testa e Gaetano Sito. Gli studenti sono:</p>
                 <ul>
                   {STUDENTS.map((student, index) => (
                     <li key={index}>{student.name} ({student.role})</li>
@@ -99,6 +109,7 @@ const CARDS = [
     content: "Carica appunti, un video YouTube o scrivi semplicemente l'argomento che vuoi studiare.",
     img: "/card-1.png",
     alt: "Un robot che riceve file.",
+    href: "/upload",
   },
   {
     title: "Il robot crea",
