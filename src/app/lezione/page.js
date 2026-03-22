@@ -38,7 +38,7 @@ export default function LezionePage() {
           <div className={styles.heroVisual}>
             <div className={styles.robotFramePrimary}>
               <Image
-                src="/robot-hi.png"
+                src="/Robot%20Mascotte%20Assets/1_Neutrale.png"
                 alt="Robot guida della lezione"
                 width={340}
                 height={340}

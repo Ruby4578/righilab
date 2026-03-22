@@ -107,6 +107,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   min-height: 350px;
   cursor: pointer;
   color: inherit;
@@ -121,10 +122,17 @@
 }
 
 .card img {
-  width: 100px;
-  height: 100px;
+  width: 148px;
+  height: 148px;
   margin: 0 auto 1rem;
   display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+.cardImage {
+  display: block;
+  margin-inline: auto;
 }
 
 .card p {
@@ -357,6 +365,13 @@
   justify-content: center;
   gap: 1rem;
   color: white;
+}
+
+.generatingImage {
+  width: min(520px, 92vw);
+  height: auto;
+  display: block;
+  margin-inline: auto;
 }
 
 .generatingTooltip {

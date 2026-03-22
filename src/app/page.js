@@ -25,7 +25,7 @@ export default function Home() {
         </div>
         <Image
           className={styles.robot}
-          src="/robot-hi.png"
+          src="/Robot%20Mascotte%20Assets/2_Saluto.png"
           alt="Il robot mascotte del sito che saluta"
           width={400}
           height={400}

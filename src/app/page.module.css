@@ -228,7 +228,11 @@
 }
 
 .card > img {
+  display: block;
+  margin-inline: auto;
   margin-bottom: 1em;
+  object-fit: contain;
+  object-position: center;
   filter: drop-shadow(0 10px 16px rgb(11 69 91 / 28%));
 }
 
@@ -321,8 +325,12 @@
 }
 
 .aboutUsContainer img {
+  display: block;
+  margin-inline: auto;
   width: clamp(260px, 42vw, 470px);
   height: auto;
+  object-fit: contain;
+  object-position: center;
   filter: drop-shadow(0 12px 20px rgb(8 59 78 / 30%));
   border-radius: 16px;
 }

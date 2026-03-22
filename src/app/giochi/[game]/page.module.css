@@ -1,0 +1,54 @@
+.main {
+  min-height: 100vh;
+  padding: 8rem 2rem 4rem;
+  background:
+    radial-gradient(circle at top left, rgb(175 245 235 / 55%), transparent 30%),
+    radial-gradient(circle at top right, rgb(105 207 225 / 35%), transparent 28%),
+    linear-gradient(180deg, #75d9de 0%, #6fd4db 18%, #46b6c3 50%, #1b6f81 100%);
+  color: white;
+}
+
+.shell {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  border-radius: 28px;
+  padding: 2rem;
+  border: 1px solid rgb(185 246 247 / 45%);
+  background:
+    linear-gradient(145deg, rgb(117 218 226 / 18%), rgb(27 111 129 / 42%)),
+    radial-gradient(circle at 15% 5%, rgb(255 255 255 / 20%), transparent 42%);
+  box-shadow:
+    0 18px 44px rgb(8 37 52 / 24%),
+    0 0 0 1px rgb(220 255 255 / 12%) inset;
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: rgb(235 255 255 / 88%);
+}
+
+.shell h1 {
+  margin-bottom: 1rem;
+}
+
+.shell p {
+  color: rgb(239 255 255 / 92%);
+  margin-bottom: 1.2rem;
+  max-width: 620px;
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding-inline: 1rem;
+  }
+
+  .shell,
+  .shell a {
+    width: 100%;
+  }
+}

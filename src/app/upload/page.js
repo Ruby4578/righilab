@@ -237,11 +237,13 @@ export default function Upload() {
       <main className={styles.main}>
         <section className={styles.generatingOnly}>
           <Image
-            src="/robot-hi.gif"
+            src="/Robot%20Mascotte%20Assets/4_VID_Caricamento_final.gif"
             alt="Robot che sta generando la lezione"
-            width={280}
-            height={280}
+            width={520}
+            height={520}
+            className={styles.generatingImage}
             priority
+            unoptimized
           />
           <p className={styles.generatingTooltip}>{GENERATION_TOOLTIPS[tooltipIndex]}</p>
         </section>

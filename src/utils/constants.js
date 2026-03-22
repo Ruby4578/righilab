@@ -22,7 +22,7 @@ export const STUDENTS = [
     },
     {
         name: "Christian S. Magarini",
-        role: "Design",
+        role: "Front-end Design",
     },
     {
         name: "Carmine Ciccarelli",
@@ -30,15 +30,15 @@ export const STUDENTS = [
     },
     {
         name: "Stefano M. Racca",
-        role: "Placeholder",
+        role: "Back-end Developer",
     },
     {
         name: "Marco Ivasyuk",
-        role: "Ukraino",
+        role: "Animations",
     },
     {
         name: "Emanuele Magno",
-        role: "Placeholder",
+        role: "Documentation",
     },
     {
         name: "Filippo Cuccurullo",
@@ -48,7 +48,7 @@ export const STUDENTS = [
 
 export const GENERATION_TOOLTIPS = [
     "Analizzo il contenuto per trovare i concetti principali...",
-    "Sto trasformando il materiale in mini-sfide interattive...",
+    "Sto trasformando il materiale in giochi interattivi...",
     "Sto semplificando i passaggi più complessi...",
     "Creo domande su misura in base al contenuto caricato...",
     "Sto controllando che il livello sia adatto allo studio...",
@@ -58,13 +58,13 @@ export const GENERATION_TOOLTIPS = [
     "Aggiungo piccoli feedback per aiutarti a migliorare...",
     "Ottimizzo la difficoltà dei prossimi esercizi...",
     "Sto creando una lezione breve e coinvolgente...",
-    "Collego i concetti tra loro per favorire la memoria...",
-    "Genero esempi pratici dal materiale che hai scelto...",
+    "Collego i concetti tra loro...",
+    "Analizzo il materiale che hai scelto...",
     "Controllo coerenza e completezza del contenuto...",
-    "Sto preparando il riepilogo finale...",
-    "Creo una progressione dal facile al difficile...",
+    "Sto preparando i giochi...",
+    "Creazione giochi in corso...",
     "Definisco obiettivi di apprendimento chiari...",
     "Rendo i contenuti più interattivi e meno passivi...",
-    "Costruisco il percorso di gioco personalizzato...",
-    "Quasi pronto: sto rifinendo gli ultimi dettagli...",
+    "Costruisco il percorso di gioco...",
+    "Quasi pronto: sto caricando tutti gli asset...",
 ];
