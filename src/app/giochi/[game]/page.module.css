@@ -32,6 +32,24 @@
   color: rgb(235 255 255 / 88%);
 }
 
+.gameSection {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.gameSection .eyebrow {
+  margin-bottom: 0.5rem;
+}
+
+.gameSection h1 {
+  margin-bottom: 0.5rem;
+}
+
+.gameSection .description {
+  margin-bottom: 1.5rem;
+}
+
 .shell h1 {
   margin-bottom: 1rem;
 }

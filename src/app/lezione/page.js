@@ -4,11 +4,35 @@ import styles from "./page.module.css";
 import Image from "next/image";
 import Button from "@/components/Button";
 import { useLesson } from "@/components/LessonProvider";
-import { FALLBACK_LESSON } from "@/utils/lesson";
 
 export default function LezionePage() {
   const { lesson } = useLesson();
-  const lessonData = lesson || FALLBACK_LESSON;
+
+  if (!lesson) {
+    return (
+      <main className={styles.main}>
+        <section className={`${styles.sectionBlock} ${styles.ctaSection}`}>
+          <div className={styles.heroVisual}>
+            <Image
+              src="/Robot%20Mascotte%20Assets/1_Neutrale.png"
+              alt="Robot guida"
+              width={200}
+              height={200}
+            />
+          </div>
+          <div className={styles.ctaCopy}>
+            <h2>Nessuna lezione caricata</h2>
+            <p>Carica appunti, un video o scegli un argomento per generare la tua lezione interattiva.</p>
+          </div>
+          <div className={styles.ctaActions}>
+            <Button href="/upload" variant="solid">Carica contenuto</Button>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const sections = lesson.sections || [];
 
   return (
     <main className={styles.main}>
@@ -28,8 +52,8 @@ export default function LezionePage() {
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
             <p className={styles.eyebrow}>Lezione generata</p>
-            <h1>{lessonData.title}</h1>
-            <p className={styles.description}>{lessonData.description}</p>
+            <h1>{lesson.title}</h1>
+            <p className={styles.description}>{lesson.description}</p>
             <p className={styles.heroHighlight}>
               Il robot non ti accompagna soltanto nella spiegazione: prepara il terreno di gioco,
               trasforma lo studio in una sfida e ti porta verso la fase più interattiva del progetto.
@@ -50,26 +74,28 @@ export default function LezionePage() {
         </div>
       </section>
 
-      <section className={styles.sectionBlock}>
-        <div className={styles.sectionHeader}>
-          <p className={styles.eyebrow}>Lezione</p>
-          <h2>Percorso guidato</h2>
-        </div>
-        <div className={styles.lessonCards}>
-          {lessonData.sections.map((section, index) => (
-            <article key={section.title} className={styles.lessonCard}>
-              <span className={styles.lessonIndex}>0{index + 1}</span>
-              <h3>{section.title}</h3>
-              <p>{section.content}</p>
-              <ul className={styles.bulletList}>
-                {section.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-      </section>
+      {sections.length > 0 && (
+        <section className={styles.sectionBlock}>
+          <div className={styles.sectionHeader}>
+            <p className={styles.eyebrow}>Lezione</p>
+            <h2>Percorso guidato</h2>
+          </div>
+          <div className={styles.lessonCards}>
+            {sections.map((section, index) => (
+              <article key={section.title || index} className={styles.lessonCard}>
+                <span className={styles.lessonIndex}>0{index + 1}</span>
+                <h3>{section.title}</h3>
+                <p>{section.content}</p>
+                <ul className={styles.bulletList}>
+                  {(section.bullets || []).map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

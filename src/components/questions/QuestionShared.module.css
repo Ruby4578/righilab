@@ -1,0 +1,100 @@
+.question {
+  width: 100%;
+}
+
+.statement {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+  color: rgb(241 255 255 / 95%);
+}
+
+.optionsRow {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.optionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.optionsList li {
+  margin: 0;
+}
+
+.option {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border-radius: 14px;
+  border: 2px solid rgb(220 255 255 / 25%);
+  background: rgb(8 56 76 / 38%);
+  color: white;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.15s;
+  text-align: left;
+}
+
+.option:hover:not(:disabled) {
+  background: rgb(8 56 76 / 55%);
+  border-color: rgb(220 255 255 / 45%);
+  transform: translateX(4px);
+}
+
+.option:disabled {
+  cursor: default;
+}
+
+.option.selected {
+  border-color: rgb(175 245 235 / 70%);
+  background: rgb(8 56 76 / 55%);
+}
+
+.option.correct {
+  border-color: rgb(80 220 120);
+  background: rgb(20 80 50 / 45%);
+}
+
+.option.wrong {
+  border-color: rgb(255 120 100);
+  background: rgb(100 30 25 / 45%);
+}
+
+.trueFalse {
+  min-width: 120px;
+  text-align: center;
+}
+
+.completeOption {
+  font-style: italic;
+}
+
+.continueBtn {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 2px solid rgb(175 245 235 / 70%);
+  background: rgb(8 80 90 / 60%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.continueBtn:hover {
+  background: rgb(8 100 110 / 75%);
+  transform: translateY(-1px);
+}

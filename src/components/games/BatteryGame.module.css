@@ -1,0 +1,194 @@
+.game {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.section {
+  border-radius: 28px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgb(185 246 247 / 45%);
+  background:
+    linear-gradient(145deg, rgb(117 218 226 / 18%), rgb(27 111 129 / 42%)),
+    radial-gradient(circle at 15% 5%, rgb(255 255 255 / 20%), transparent 42%);
+  box-shadow:
+    0 18px 44px rgb(8 37 52 / 24%),
+    0 0 0 1px rgb(220 255 255 / 12%) inset;
+  backdrop-filter: blur(10px) saturate(130%);
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: rgb(235 255 255 / 88%);
+}
+
+.section h2 {
+  margin-bottom: 0.75rem;
+}
+
+.hint {
+  color: rgb(239 255 255 / 90%);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.error {
+  color: rgb(255 180 160);
+  margin-bottom: 1rem;
+}
+
+.difficultyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.diffCard {
+  padding: 1.25rem;
+  border-radius: 18px;
+  border: 2px solid rgb(220 255 255 / 25%);
+  background: rgb(8 56 76 / 38%);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.15s;
+}
+
+.diffCard:hover {
+  background: rgb(8 56 76 / 55%);
+  border-color: rgb(220 255 255 / 45%);
+  transform: translateY(-2px);
+}
+
+.diffLabel {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.diffDetail {
+  font-size: 0.85rem;
+  color: rgb(235 255 255 / 85%);
+}
+
+.loadingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  color: white;
+}
+
+.loadingRobot {
+  border-radius: 20px;
+}
+
+.playSection {
+  padding: 1.5rem 0;
+}
+
+.playLayout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: start;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.robotArea {
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.robotImage {
+  filter: drop-shadow(0 10px 24px rgb(10 53 70 / 35%));
+}
+
+.batteryLabel {
+  text-align: center;
+  font-weight: 600;
+  color: rgb(235 255 255 / 95%);
+  margin-top: 0.5rem;
+}
+
+.questionsArea {
+  min-width: 0;
+}
+
+.questionCard {
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgb(185 246 247 / 45%);
+  background:
+    linear-gradient(145deg, rgb(27 80 100 / 92%), rgb(15 50 70 / 96%)),
+    radial-gradient(circle at 15% 5%, rgb(255 255 255 / 12%), transparent 40%);
+  box-shadow:
+    0 16px 40px rgb(0 20 35 / 35%),
+    0 0 0 1px rgb(220 255 255 / 12%) inset;
+  color: white;
+}
+
+.progress {
+  font-size: 0.85rem;
+  color: rgb(220 255 255 / 85%);
+  margin-bottom: 1rem;
+}
+
+.resultSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.resultSection h2 {
+  margin: 0;
+}
+
+.resultSection p {
+  color: rgb(239 255 255 / 92%);
+}
+
+.resultActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.backArea {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .difficultyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .playLayout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .robotArea {
+    position: static;
+  }
+}

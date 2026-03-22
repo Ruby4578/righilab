@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import { useLesson } from "@/components/LessonProvider";
 import { GENERATION_TOOLTIPS } from "@/utils/constants";
-import { buildStaticLesson } from "@/utils/lesson";
 
 export default function Upload() {
   const router = useRouter();
@@ -24,6 +23,8 @@ export default function Upload() {
   const [tooltipIndex, setTooltipIndex] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [generationError, setGenerationError] = useState("");
+  const [generationComplete, setGenerationComplete] = useState(false);
 
   const steps = [
     "Step 1: Scegli metodo",
@@ -57,18 +58,18 @@ export default function Upload() {
   }, [isGenerating]);
 
   useEffect(() => {
-    if (!isGenerating) {
+    if (!isGenerating || !generationComplete) {
       return undefined;
     }
 
     const redirectTimeoutId = window.setTimeout(() => {
       router.push("/lezione");
-    }, 3200);
+    }, 1500);
 
     return () => {
       window.clearTimeout(redirectTimeoutId);
     };
-  }, [isGenerating, router]);
+  }, [isGenerating, generationComplete, router]);
 
   const handleCardClick = (method) => {
     setSelectedMethod(method);
@@ -105,6 +106,7 @@ export default function Upload() {
   };
 
   const handleBack = () => {
+    setGenerationError("");
     if (phase > 1) {
       setPhase((previousPhase) => previousPhase - 1);
       setCurrentStep((previousStep) => previousStep - 1);
@@ -198,7 +200,7 @@ export default function Upload() {
     setUploadedTopics((previousTopics) => previousTopics.filter((topic) => topic !== topicToRemove));
   };
 
-  const handleStartGeneration = () => {
+  const handleStartGeneration = async () => {
     const confirmed = window.confirm("Confermi la generazione della lezione interattiva?");
     if (!confirmed) {
       return;
@@ -213,13 +215,39 @@ export default function Upload() {
             ? uploadedTopics
             : [];
 
-    setLesson(buildStaticLesson({
-      method: selectedMethod,
-      items: lessonItems,
-    }));
-
     setTooltipIndex(Math.floor(Math.random() * GENERATION_TOOLTIPS.length));
     setIsGenerating(true);
+    setGenerationComplete(false);
+    setGenerationError("");
+
+    try {
+      let res;
+      if (selectedMethod === "notes" && uploadedFiles.length > 0) {
+        const formData = new FormData();
+        formData.set("method", selectedMethod);
+        formData.set("items", JSON.stringify(lessonItems));
+        uploadedFiles.forEach((f) => formData.append("files", f));
+        res = await fetch("/api/generate-lesson", { method: "POST", body: formData });
+      } else {
+        res = await fetch("/api/generate-lesson", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ method: selectedMethod, items: lessonItems }),
+        });
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Errore ${res.status}. Riprova.`);
+      }
+      const lessonData = await res.json();
+      setLesson(lessonData);
+      setGenerationComplete(true);
+    } catch (err) {
+      const msg = err?.message || "Errore nella generazione. Riprova.";
+      setGenerationError(msg);
+      setIsGenerating(false);
+      setGenerationComplete(false);
+    }
   };
 
   const handleDrop = (e) => {
@@ -278,6 +306,11 @@ export default function Upload() {
             </div>
           ))}
         </div>
+        {generationError && (
+          <div className={styles.generationError} role="alert">
+            <p>{generationError}</p>
+          </div>
+        )}
         <div className={styles.phaseViewport}>
           <AnimatePresence mode="wait">
             {phase === 1 && (

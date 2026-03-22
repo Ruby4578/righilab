@@ -318,6 +318,20 @@
   font-weight: 600;
 }
 
+.generationError {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: rgb(180 50 50 / 35%);
+  border: 1px solid rgb(255 200 200 / 50%);
+  color: rgb(255 240 240);
+  font-weight: 500;
+}
+
+.generationError p {
+  margin: 0;
+}
+
 /* Box delle fasi 2 e 3 */
 .uploadForm {
   background: #62d2d2;

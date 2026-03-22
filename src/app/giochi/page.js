@@ -8,14 +8,14 @@ export default function GiochiPage() {
     <main className={styles.main}>
       <section className={styles.sectionBlock}>
         <div className={styles.sectionHeader}>
-          <h1>IMPARA GIOCANDO!</h1>
+          <h1>Impara Giocando!</h1>
           <p className={styles.description}>
             Scegli come vuoi imparare!
           </p>
         </div>
 
         <div className={styles.cardsGrid}>
-          {GAME_TYPES.map((game) => (
+          {GAME_TYPES.filter((g) => g.providerKey === "battery").map((game) => (
             <article key={game.slug} className={styles.card}>
               <Image
                 src={game.image}
