@@ -3,7 +3,7 @@ import {
   generateLesson,
   buildContentForAI,
 } from "@/lib/gemini";
-import { extractTextFromFiles } from "@/lib/extractContent";
+import { extractTextFromFiles, extractTranscriptFromVideos } from "@/lib/extractContent";
 
 /**
  * POST /api/generate-lesson
@@ -11,7 +11,7 @@ import { extractTextFromFiles } from "@/lib/extractContent";
  * Opzione A - JSON:
  *   Body: { method: "notes"|"video"|"topic", items: string[], rawContent?: string }
  *   Per notes: rawContent con testo estratto, oppure usa Opzione B.
- *   Per video: rawContent con trascrizioni, oppure lascia vuoto.
+ *   Per video: items = URL YouTube; il server estrae automaticamente le trascrizioni.
  *   Per topic: items = argomenti.
  *
  * Opzione B - FormData (per method=notes con file):
@@ -46,11 +46,17 @@ export async function POST(request) {
           rawContent = await extractTextFromFiles(fileBuffers);
         }
       }
+      if (method === "video" && items.length > 0) {
+        rawContent = await extractTranscriptFromVideos(items);
+      }
     } else {
       const body = await request.json();
       method = body.method;
       items = body.items;
       rawContent = body.rawContent || "";
+      if (method === "video" && items?.length > 0 && !rawContent?.trim()) {
+        rawContent = await extractTranscriptFromVideos(items);
+      }
     }
 
     if (!method || !Array.isArray(items)) {
@@ -60,13 +66,27 @@ export async function POST(request) {
       );
     }
 
+    if (method === "video" && items.length > 0) {
+      const hasValidTranscript = /\[\d+:\d{2}\]\s+.{2,}/.test(rawContent);
+      if (!hasValidTranscript) {
+        return NextResponse.json(
+          {
+            error:
+              "Impossibile ottenere la trascrizione dei video. Verifica che abbiano i sottotitoli attivati e siano pubblici.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const extractedContent = buildContentForAI({
       method,
       items,
       rawContent: rawContent || "",
     });
 
-    const lesson = await generateLesson(extractedContent, { method, items });
+    const inputType = method === "notes" ? "appunti" : method === "video" ? "youtube" : "argomento";
+    const lesson = await generateLesson(extractedContent, { method, items }, inputType);
     if (!lesson.id) {
       lesson.id = `lesson-${method}-${Date.now()}`;
     }
@@ -81,9 +101,18 @@ export async function POST(request) {
     if (message.includes("401") || message.includes("API key") || message.includes("invalid")) {
       message = "Chiave API non valida. Verifica GEMINI_API_KEY in .env.local";
     }
-    const status = message.includes("coerenti") || message.includes("adatto") || message.includes("bloccato")
-      ? 400
-      : 500;
+    let status = err?.status === 429 ? 429 : 500;
+    if (message.includes("coerenti") || message.includes("adatto") || message.includes("bloccato")) {
+      status = 400;
+    } else if (
+      status === 429 ||
+      message.includes("429") ||
+      message.includes("quota") ||
+      message.includes("RESOURCE_EXHAUSTED")
+    ) {
+      message = "Limite di richieste superato. Riprova tra qualche minuto.";
+      status = 429;
+    }
     return NextResponse.json({ error: message }, { status });
   }
 }

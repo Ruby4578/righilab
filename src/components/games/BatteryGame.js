@@ -203,10 +203,6 @@ export default function BatteryGame() {
           </div>
         </section>
       )}
-
-      <div className={styles.backArea}>
-        <Button href="/giochi" variant="outline">Torna ai giochi</Button>
-      </div>
     </div>
   );
 }

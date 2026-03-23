@@ -55,6 +55,7 @@ const LESSON_JSON_SCHEMA = {
           title: { type: "string" },
           content: { type: "string" },
           bullets: { type: "array", items: { type: "string" } },
+          timestamp: { type: "string", description: "Per video: es. '0:00-2:30' o 'Parte 1'" },
         },
         required: ["title", "content", "bullets"],
       },
@@ -179,7 +180,7 @@ export function buildContentForAI({ method, items, rawContent }) {
 const VALIDATION_SCHEMA = {
   type: "object",
   properties: {
-    valid: { type: "boolean", description: "true se i contenuti sono coerenti e possono formare una lezione unitaria" },
+    valid: { type: "boolean", description: "true se i contenuti sono coerenti e possono formare una lezione unitaria. Inoltre, i contenuti devono essere chiari, leggibili e di senso compiuti, evitando ammassi di parole senza senso o video non leggibili." },
     errorMessage: { type: "string", description: "Messaggio da mostrare all'utente SOLO se valid è false. Breve, chiaro, in italiano." },
   },
   required: ["valid"],
@@ -189,7 +190,7 @@ export async function validateContentCoherence(extractedContent, context) {
   const ai = getClient();
   const { method, itemCount } = context;
 
-  if (method === "topic" && itemCount <= 1) return { valid: true };
+  if (method === "topic") return { valid: true };
   if ((method === "notes" || method === "video") && itemCount <= 1) return { valid: true };
 
   const prompt = `Analizza il contenuto sottostante. L'utente ha caricato ${itemCount} ${method === "notes" ? "file" : method === "video" ? "video" : "argomenti"}.
@@ -200,6 +201,7 @@ ${extractedContent.slice(0, 30000)}
 Regole:
 - valid: true SOLO se tutti i contenuti trattano lo stesso argomento, argomenti fortemente correlati, o uno è complementare all'altro (es. teoria + esercizi su stesso tema).
 - valid: false se i contenuti sono su argomenti completamente diversi e non collegabili (es. "Sistema solare" + "Seconda guerra mondiale").
+- valid: false se i contenuti sono non leggibili o su argomenti senza senso (es. eddfgjufbndsjf).
 - Se valid: false, errorMessage deve essere un messaggio breve in italiano per l'utente, es: "I file caricati trattano argomenti troppo diversi. Carica materiale sullo stesso tema o argomenti collegati per creare una lezione coerente."
 
 Rispondi SOLO con JSON: { "valid": true } oppure { "valid": false, "errorMessage": "..." }`;
@@ -227,6 +229,41 @@ Rispondi SOLO con JSON: { "valid": true } oppure { "valid": false, "errorMessage
   }
 }
 
+/**
+ * Estrae e parsea JSON da risposte che possono contenere markdown o testo extra.
+ */
+function parseJsonFromResponse(text) {
+  const raw = (text || "").trim();
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    /* continua con fallback */
+  }
+
+  const codeBlockMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    try {
+      return JSON.parse(codeBlockMatch[1].trim());
+    } catch {
+      /* continua */
+    }
+  }
+
+  const firstBrace = raw.indexOf("{");
+  const lastBrace = raw.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    try {
+      return JSON.parse(raw.slice(firstBrace, lastBrace + 1));
+    } catch {
+      /* continua */
+    }
+  }
+
+  return null;
+}
+
 function checkSafetyBlock(response, context) {
   const feedback = response?.promptFeedback;
   if (feedback?.blockReason) {
@@ -238,7 +275,12 @@ function checkSafetyBlock(response, context) {
   }
 }
 
-export async function generateLesson(extractedContent, source) {
+/**
+ * @param {string} extractedContent - Testo estratto da file/video o argomenti
+ * @param {object} source - { method, items }
+ * @param {"youtube"|"appunti"|"argomento"} inputType - Tipo di input: youtube (video), appunti (file), argomento (topic)
+ */
+export async function generateLesson(extractedContent, source, inputType) {
   const items = Array.isArray(source.items) ? source.items : [source.items];
   const validation = await validateContentCoherence(extractedContent, {
     method: source.method,
@@ -251,21 +293,60 @@ export async function generateLesson(extractedContent, source) {
   const ai = getClient();
   const label = METHOD_LABELS[source.method] || "Contenuto";
   const primaryTopic = items[0] || "contenuto";
+  const content = extractedContent.slice(0, 80000);
 
-  const prompt = `Sei un assistente didattico. Crea una mini-lezione interattiva in italiano.
+  const prompts = {
+    appunti: `Sei un assistente didattico. L'utente ha caricato APPUNTI e sa già bene o male i contenuti: vuole un ripasso conciso e poi giocare.
 
-CONTENUTO DA ANALIZZARE:
-${extractedContent.slice(0, 80000)}
+CONTENUTO DA ANALIZZARE (appunti dell'utente):
+${content}
 
-Requisiti:
-- Titolo chiaro e coinvolgente
-- 3 sezioni con titolo, contenuto breve e 2-4 bullet
+Requisiti per APPUNTI:
+- Mini-lezione snella: titolo chiaro, 3 sezioni con contenuto breve e 2-4 bullet
+- Focus su concetti chiave da rafforzare prima dei giochi
 - 3 mini-giochi (Vero o falso, Parola chiave mancante, Ordina i passaggi) con titolo, descrizione e obiettivo
-- Obiettivi di apprendimento: 3 punti
-- Usa source.method="${source.method}", source.label="${label}", source.items come array dei riferimenti
-- id: "lesson-${source.method}"
+- Obiettivi: 3 punti essenziali
+- source.method="notes", source.label="${label}", source.items come array dei file
+- id: "lesson-notes"
+- Stile: sintetico, va dritto al punto`,
 
-Rispondi SOLO con il JSON richiesto, nessun testo aggiuntivo.`;
+    youtube: `Sei un assistente didattico. L'utente ha fornito VIDEO YouTube e vuole sapere di cosa parlano SENZA guardarli tutti: una spiegazione cronologica chiara.
+
+CONTENUTO (trascrizione/analisi del video):
+${content}
+
+Requisiti per VIDEO:
+- Spiegazione in ORDINE CRONOLOGICO di ciò che il video tratta
+- NON una trascrizione: una SPIEGAZIONE chiara e fluida
+- NON tralasciare nulla: copri tutto in modo accurato ma espositivo
+- NON essere troppo riassuntivo: l'utente deve capire bene i passaggi
+- Crea sezioni che corrispondono alle parti del video (aggiungi timestamp se possibile, es. "0:00-3:20")
+- Ogni sezione: title (con riferimento temporale), content (spiegazione dettagliata), bullets (punti salienti)
+- 3 mini-giochi per verificare la comprensione
+- source.method="video", source.label="${label}", source.items = link o titoli video
+- id: "lesson-video"
+- Stile: narrativo, chiaro, nessun dettaglio perso`,
+
+    argomento: `Sei un assistente didattico. L'utente ha scelto ARGOMENTI senza avere appunti: vuole STUDIARE da zero una lezione completa e dettagliata.
+
+ARGOMENTI DA SPIEGARE:
+${content}
+
+Requisiti per ARGOMENTO:
+- Lezione COMPLETA e DETTAGLIATA: spiega tutto bene, come se fosse un corso
+- Stile giovanile e giocoso ma senza sacrificare chiarezza e completezza
+- Più sezioni (4-6) con contenuti ricchi
+- Ogni sezione: titolo, contenuto approfondito, bullets per i passaggi chiave
+- L'utente non ha materiale: deve poter studiare solo da questa lezione
+- 3 mini-giochi per ripassare
+- source.method="topic", source.label="${label}", source.items = argomenti
+- id: "lesson-topic"
+- Stile: coinvolgente, completo, accurato`,
+  };
+
+  const prompt = (prompts[inputType] || prompts.appunti) + `
+
+Rispondi SOLO con il JSON richiesto (stesso schema: id, title, description, source, objectives, sections, miniGames). Nessun testo aggiuntivo.`;
 
   const response = await ai.models.generateContent({
     model: MODEL,
@@ -285,11 +366,10 @@ Rispondi SOLO con il JSON richiesto, nessun testo aggiuntivo.`;
   if (!text) {
     throw new Error("Errore nel caricamento della lezione. Riprova.");
   }
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("Errore nel formato della lezione generata. Riprova.");
-  }
+  const parsed = parseJsonFromResponse(text);
+  if (parsed) return parsed;
+  console.warn("[generateLesson] Risposta non valida, inizio:", text.slice(0, 200));
+  throw new Error("Errore nel formato della lezione generata. Riprova.");
 }
 
 /**

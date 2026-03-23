@@ -160,6 +160,68 @@
   flex-shrink: 0;
 }
 
+/* Video: timeline cronologica */
+.videoTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.videoSegment {
+  border-radius: 22px;
+  padding: 1.5rem;
+  background: rgb(8 56 76 / 42%);
+  border: 1px solid rgb(220 255 255 / 16%);
+  border-left: 4px solid rgb(175 245 235 / 60%);
+}
+
+.videoSegmentHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.timestamp {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgb(175 245 235 / 95%);
+  background: rgb(8 80 90 / 50%);
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+}
+
+.videoSegment h3 {
+  margin: 0;
+}
+
+.videoContent {
+  color: rgb(241 255 255 / 94%);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+/* Argomento: lezione completa */
+.topicSections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.topicCard {
+  border-radius: 22px;
+  padding: 1.75rem;
+  background: rgb(8 56 76 / 42%);
+  border: 1px solid rgb(220 255 255 / 16%);
+}
+
+.topicContent p {
+  color: rgb(241 255 255 / 94%);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+
 @media (max-width: 900px) {
   .lessonCards,
   .heroContent {

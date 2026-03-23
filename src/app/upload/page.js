@@ -8,6 +8,10 @@ import Button from "@/components/Button";
 import { useLesson } from "@/components/LessonProvider";
 import { GENERATION_TOOLTIPS } from "@/utils/constants";
 
+const MAX_FILES = 3;
+const MAX_VIDEOS = 1;
+const MAX_TOPICS = 3;
+
 export default function Upload() {
   const router = useRouter();
   const { setLesson } = useLesson();
@@ -84,7 +88,7 @@ export default function Upload() {
       return;
     }
     if (selectedMethod === "video" && uploadedVideos.length === 0) {
-      setUploadError("Aggiungi almeno un link YouTube prima di continuare.");
+      setUploadError("Aggiungi un link YouTube prima di continuare.");
       return;
     }
     if (selectedMethod === "topic" && uploadedTopics.length === 0) {
@@ -122,23 +126,19 @@ export default function Upload() {
   };
 
   const addFiles = (files) => {
-    if (!files.length) {
-      return;
-    }
+    if (!files.length) return;
 
     setUploadedFiles((previousFiles) => {
+      if (previousFiles.length >= MAX_FILES) return previousFiles;
+
       const nextFiles = [...previousFiles];
-
-      files.forEach((file) => {
+      for (const file of files) {
+        if (nextFiles.length >= MAX_FILES) break;
         const alreadyAdded = nextFiles.some(
-          (existingFile) => existingFile.name === file.name && existingFile.size === file.size && existingFile.lastModified === file.lastModified,
+          (f) => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified,
         );
-
-        if (!alreadyAdded) {
-          nextFiles.push(file);
-        }
-      });
-
+        if (!alreadyAdded) nextFiles.push(file);
+      }
       return nextFiles;
     });
     setUploadError("");
@@ -166,6 +166,11 @@ export default function Upload() {
       return;
     }
 
+    if (uploadedVideos.length >= MAX_VIDEOS) {
+      setUploadError(`Puoi aggiungere massimo ${MAX_VIDEOS} video.`);
+      return;
+    }
+
     setUploadedVideos((previousVideos) => (
       previousVideos.includes(normalizedValue)
         ? previousVideos
@@ -187,6 +192,11 @@ export default function Upload() {
       return;
     }
 
+    if (uploadedTopics.length >= MAX_TOPICS) {
+      setUploadError(`Puoi aggiungere massimo ${MAX_TOPICS} argomenti.`);
+      return;
+    }
+
     setUploadedTopics((previousTopics) => (
       previousTopics.includes(normalizedValue)
         ? previousTopics
@@ -201,11 +211,6 @@ export default function Upload() {
   };
 
   const handleStartGeneration = async () => {
-    const confirmed = window.confirm("Confermi la generazione della lezione interattiva?");
-    if (!confirmed) {
-      return;
-    }
-
     const lessonItems =
       selectedMethod === "notes"
         ? uploadedFiles.map((file) => file.name)
@@ -253,10 +258,9 @@ export default function Upload() {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
+    if (uploadedFiles.length >= MAX_FILES) return;
     const droppedFiles = Array.from(e.dataTransfer.files || []);
-    if (!droppedFiles.length) {
-      return;
-    }
+    if (!droppedFiles.length) return;
     addFiles(droppedFiles);
   };
 
@@ -361,9 +365,9 @@ export default function Upload() {
                 {selectedMethod === 'notes' && (
                   <form onSubmit={handleSubmit} className={styles.form}>
                     <h3>Carica i tuoi appunti</h3>
-                    <p className={styles.formSubtitle}>Carica uno o più file (DOC, PDF, TXT) e poi conferma per passare alla generazione.</p>
+                    <p className={styles.formSubtitle}>Carica fino a {MAX_FILES} file (DOC, PDF, TXT) e poi conferma.</p>
                     <label
-                      className={`${styles.uploadDropzone} ${isDragOver ? styles.dropzoneActive : ""}`}
+                      className={`${styles.uploadDropzone} ${isDragOver ? styles.dropzoneActive : ""} ${uploadedFiles.length >= MAX_FILES ? styles.dropzoneDisabled : ""}`}
                       onDragOver={(e) => {
                         e.preventDefault();
                         setIsDragOver(true);
@@ -375,6 +379,7 @@ export default function Upload() {
                         type="file"
                         accept=".pdf,.doc,.docx,.txt"
                         multiple
+                        disabled={uploadedFiles.length >= MAX_FILES}
                         className={styles.dropzoneInput}
                         onChange={(e) => {
                           addFiles(Array.from(e.target.files || []));
@@ -387,6 +392,7 @@ export default function Upload() {
                     {uploadError ? <p className={styles.uploadError}>{uploadError}</p> : null}
                     {uploadedFiles.length > 0 ? (
                       <div className={styles.uploadedFiles}>
+                        <span className={styles.countBadge}>{uploadedFiles.length}/{MAX_FILES} file</span>
                         {uploadedFiles.map((file) => (
                           <div
                             key={`${file.name}-${file.size}-${file.lastModified}`}
@@ -413,7 +419,7 @@ export default function Upload() {
                 {selectedMethod === 'video' && (
                   <form onSubmit={handleSubmit} className={styles.form}>
                     <h3>Inserisci link YouTube</h3>
-                    <p className={styles.formSubtitle}>Incolla uno o più link YouTube, aggiungili alla lista e poi conferma.</p>
+                    <p className={styles.formSubtitle}>Inserisci {MAX_VIDEOS} link YouTube e conferma.</p>
                     <div className={styles.videoInputGroup}>
                       <input
                         type="url"
@@ -421,14 +427,21 @@ export default function Upload() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         className={styles.themedInput}
+                        disabled={uploadedVideos.length >= MAX_VIDEOS}
                       />
-                      <Button type="button" variant="outline" onClick={handleAddVideo}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddVideo}
+                        disabled={uploadedVideos.length >= MAX_VIDEOS}
+                      >
                         Aggiungi video
                       </Button>
                     </div>
                     {uploadError ? <p className={styles.uploadError}>{uploadError}</p> : null}
                     {uploadedVideos.length > 0 ? (
                       <div className={styles.uploadedFiles}>
+                        <span className={styles.countBadge}>{uploadedVideos.length}/{MAX_VIDEOS} video</span>
                         {uploadedVideos.map((video) => (
                           <div key={video} className={styles.fileCard}>
                             <span className={styles.fileName}>{video}</span>
@@ -452,7 +465,7 @@ export default function Upload() {
                 {selectedMethod === 'topic' && (
                   <form onSubmit={handleSubmit} className={styles.form}>
                     <h3>Scegli l&apos;argomento</h3>
-                    <p className={styles.formSubtitle}>Scrivi uno o più argomenti da studiare, aggiungili alla lista e poi prosegui.</p>
+                    <p className={styles.formSubtitle}>Aggiungi fino a {MAX_TOPICS} argomenti da studiare e conferma.</p>
                     <div className={styles.videoInputGroup}>
                       <input
                         type="text"
@@ -460,14 +473,21 @@ export default function Upload() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         className={styles.themedInput}
+                        disabled={uploadedTopics.length >= MAX_TOPICS}
                       />
-                      <Button type="button" variant="outline" onClick={handleAddTopic}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddTopic}
+                        disabled={uploadedTopics.length >= MAX_TOPICS}
+                      >
                         Aggiungi argomento
                       </Button>
                     </div>
                     {uploadError ? <p className={styles.uploadError}>{uploadError}</p> : null}
                     {uploadedTopics.length > 0 ? (
                       <div className={styles.uploadedFiles}>
+                        <span className={styles.countBadge}>{uploadedTopics.length}/{MAX_TOPICS} argomenti</span>
                         {uploadedTopics.map((topic) => (
                           <div key={topic} className={styles.fileCard}>
                             <span className={styles.fileName}>{topic}</span>
