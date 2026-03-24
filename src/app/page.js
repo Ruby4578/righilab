@@ -25,10 +25,10 @@ export default function Home() {
         </div>
         <Image
           className={styles.robot}
-          src="/Robot%20Mascotte%20Assets/2_Saluto.png"
+          src="/Robot%20Mascotte%20Assets/1_VID_Saluto_final.gif"
           alt="Il robot mascotte del sito che saluta"
-          width={400}
-          height={400}
+          width={600}
+          height={600}
         />
       </section>
       <div className={styles.contentGradient}>
