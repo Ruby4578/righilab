@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const MODEL = "gemini-2.5-flash";
 const MAX_OUTPUT_TOKENS = 4096;
+const MAX_LESSON_TOKENS = 8192;
 
 const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -230,34 +231,76 @@ Rispondi SOLO con JSON: { "valid": true } oppure { "valid": false, "errorMessage
 }
 
 /**
- * Estrae e parsea JSON da risposte che possono contenere markdown o testo extra.
+ * Tenta di riparare JSON troncato (es. per limite token) aggiungendo le parentesi mancanti.
+ */
+function tryRepairTruncatedJson(str) {
+  let s = str.trim();
+  if (!s.startsWith("{")) return s;
+  const stack = [];
+  let inString = false;
+  let escape = false;
+  let quote = null;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (inString) {
+      if (c === "\\") escape = true;
+      else if (c === quote) inString = false;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      inString = true;
+      quote = c;
+      continue;
+    }
+    if (c === "{") stack.push("}");
+    else if (c === "[") stack.push("]");
+    else if (c === "}" || c === "]") stack.pop();
+  }
+  s = s.replace(/,(\s*[}\]])/g, "$1");
+  return s + stack.reverse().join("");
+}
+
+/**
+ * Estrae e parsea JSON da risposte che possono contenere markdown, testo extra o essere troncate.
  */
 function parseJsonFromResponse(text) {
   const raw = (text || "").trim();
   if (!raw) return null;
 
-  try {
-    return JSON.parse(raw);
-  } catch {
-    /* continua con fallback */
+  for (const candidate of [raw, tryRepairTruncatedJson(raw)]) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      /* continua */
+    }
   }
 
   const codeBlockMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
-    try {
-      return JSON.parse(codeBlockMatch[1].trim());
-    } catch {
-      /* continua */
+    const inner = codeBlockMatch[1].trim();
+    for (const candidate of [inner, tryRepairTruncatedJson(inner)]) {
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        /* continua */
+      }
     }
   }
 
   const firstBrace = raw.indexOf("{");
   const lastBrace = raw.lastIndexOf("}");
   if (firstBrace >= 0 && lastBrace > firstBrace) {
-    try {
-      return JSON.parse(raw.slice(firstBrace, lastBrace + 1));
-    } catch {
-      /* continua */
+    const slice = raw.slice(firstBrace, lastBrace + 1);
+    for (const candidate of [slice, tryRepairTruncatedJson(slice)]) {
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        /* continua */
+      }
     }
   }
 
@@ -335,18 +378,18 @@ ${content}
 Requisiti per ARGOMENTO:
 - Lezione COMPLETA e DETTAGLIATA: spiega tutto bene, come se fosse un corso
 - Stile giovanile e giocoso ma senza sacrificare chiarezza e completezza
-- Più sezioni (4-6) con contenuti ricchi
-- Ogni sezione: titolo, contenuto approfondito, bullets per i passaggi chiave
+- 4-6 sezioni (una per argomento o per tema correlato): titolo, content (testo chiaro), bullets (2-4 punti)
+- Contenuti bilanciati: non troppo lunghi per sezione per evitare troncamenti
 - L'utente non ha materiale: deve poter studiare solo da questa lezione
-- 3 mini-giochi per ripassare
-- source.method="topic", source.label="${label}", source.items = argomenti
+- 3 mini-giochi per ripassare (title, description, objective brevi)
+- source.method="topic", source.label="${label}", source.items = ${JSON.stringify(items)}
 - id: "lesson-topic"
-- Stile: coinvolgente, completo, accurato`,
+- JSON valido: solo virgolette doppie, niente a capo non escapati (usa \\n per andare a capo nei testi)`,
   };
 
   const prompt = (prompts[inputType] || prompts.appunti) + `
 
-Rispondi SOLO con il JSON richiesto (stesso schema: id, title, description, source, objectives, sections, miniGames). Nessun testo aggiuntivo.`;
+Rispondi SOLO con JSON valido (schema: id, title, description, source, objectives, sections, miniGames). Nessun testo prima o dopo.`;
 
   const response = await ai.models.generateContent({
     model: MODEL,
@@ -354,8 +397,8 @@ Rispondi SOLO con il JSON richiesto (stesso schema: id, title, description, sour
     config: {
       responseMimeType: "application/json",
       responseJsonSchema: LESSON_JSON_SCHEMA,
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      temperature: 0.7,
+      maxOutputTokens: inputType === "argomento" ? MAX_LESSON_TOKENS : MAX_OUTPUT_TOKENS,
+      temperature: inputType === "argomento" ? 0.5 : 0.7,
       safetySettings: SAFETY_SETTINGS,
     },
   });
